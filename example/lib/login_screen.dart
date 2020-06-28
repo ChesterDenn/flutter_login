@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
@@ -5,6 +7,7 @@ import 'constants.dart';
 import 'custom_route.dart';
 import 'dashboard_screen.dart';
 import 'users.dart';
+import 'package:flutter_login/widgets.dart';
 
 class LoginScreen extends StatelessWidget {
   static const routeName = '/auth';
@@ -170,6 +173,19 @@ class LoginScreen extends StatelessWidget {
         // Show new password dialog
       },
       showDebugButtons: true,
+      onFacebookLogin: (loginData) {
+        return Future.delayed(loginTime).then((_) {
+          if(Random().nextInt(100) > 50) {
+            return "Testing Facebook";
+          } else
+            return null;
+        });
+      },
+      onGoogleLogin: (loginData) {
+        return Future.delayed(loginTime).then((_) {
+          return "Testing Google";
+        });
+      },
     );
   }
 }

@@ -366,6 +366,8 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
   AnimationController _switchAuthController;
   AnimationController _postSwitchAuthController;
   AnimationController _submitController;
+  AnimationController _submitFacebookController;
+  AnimationController _submitGoogleController;
 
   Interval _nameTextFieldLoadingAnimationInterval;
   Interval _passTextFieldLoadingAnimationInterval;
@@ -405,6 +407,16 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
       duration: Duration(milliseconds: 1000),
     );
 
+    _submitFacebookController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000),
+    );
+
+    _submitGoogleController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000),
+    );
+
     _nameTextFieldLoadingAnimationInterval = const Interval(0, .85);
     _passTextFieldLoadingAnimationInterval = const Interval(.15, 1.0);
     _textButtonLoadingAnimationInterval =
@@ -436,6 +448,8 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
     _switchAuthController.dispose();
     _postSwitchAuthController.dispose();
     _submitController.dispose();
+    _submitFacebookController.dispose();
+    _submitGoogleController.dispose();
   }
 
   void _switchAuthMode() {
@@ -484,6 +498,74 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
     });
 
     _submitController.reverse();
+
+    if (!DartHelper.isNullOrEmpty(error)) {
+      showErrorToast(context, error);
+      Future.delayed(const Duration(milliseconds: 271), () {
+        setState(() => _showShadow = true);
+      });
+      setState(() => _isSubmitting = false);
+      return false;
+    }
+
+    widget?.onSubmitCompleted();
+
+    return true;
+  }
+
+  Future<bool> _submitFacebookLogin() async {
+
+    FocusScope.of(context).requestFocus(FocusNode());
+
+    _formKey.currentState.save();
+    _submitFacebookController.forward();
+    setState(() => _isSubmitting = true);
+
+    final auth = Provider.of<Auth>(context, listen: false);
+    String error = await auth.onFacebookLogin(LoginData(
+      name: auth.email,
+      password: auth.password,
+    ));
+
+    Future.delayed(const Duration(milliseconds: 270), () {
+      setState(() => _showShadow = false);
+    });
+
+    _submitFacebookController.reverse();
+
+    if (!DartHelper.isNullOrEmpty(error)) {
+      showErrorToast(context, error);
+      Future.delayed(const Duration(milliseconds: 271), () {
+        setState(() => _showShadow = true);
+      });
+      setState(() => _isSubmitting = false);
+      return false;
+    }
+
+    widget?.onSubmitCompleted();
+
+    return true;
+  }
+
+  Future<bool> _submitGoogleLogin() async {
+
+    FocusScope.of(context).requestFocus(FocusNode());
+
+    _formKey.currentState.save();
+    _submitGoogleController.forward();
+    setState(() => _isSubmitting = true);
+
+    final auth = Provider.of<Auth>(context, listen: false);
+    String error = await auth.onGoogleLogin(LoginData(
+      name: auth.email,
+      password: auth.password,
+    ));
+
+    Future.delayed(const Duration(milliseconds: 270), () {
+      setState(() => _showShadow = false);
+    });
+
+    _submitGoogleController.reverse();
 
     if (!DartHelper.isNullOrEmpty(error)) {
       showErrorToast(context, error);
@@ -616,6 +698,30 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildFacebookButton(ThemeData theme, LoginMessages messages, Auth auth) {
+    return ScaleTransition(
+      scale: _buttonScaleAnimation,
+      child: AnimatedButton(
+        color: Colors.blue,
+        controller: _submitFacebookController,
+        text: "Facebook",
+        onPressed: _submitFacebookLogin,
+      ),
+    );
+  }
+
+  Widget _buildGoogleButton(ThemeData theme, LoginMessages messages, Auth auth) {
+    return ScaleTransition(
+      scale: _buttonScaleAnimation,
+      child: AnimatedButton(
+        color: Colors.red,
+        controller: _submitGoogleController,
+        text: "Google",
+        onPressed: _submitGoogleLogin,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<Auth>(context, listen: true);
@@ -671,6 +777,9 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
                 _buildForgotPassword(theme, messages),
                 _buildSubmitButton(theme, messages, auth),
                 _buildSwitchAuthButton(theme, messages, auth),
+                (auth.onFacebookLogin != null) ? _buildFacebookButton(theme, messages, auth) : SizedBox(),
+                SizedBox(height: 10,),
+                (auth.onGoogleLogin != null) ? _buildGoogleButton(theme, messages, auth) : SizedBox(),
               ],
             ),
           ),

@@ -218,6 +218,8 @@ class FlutterLogin extends StatefulWidget {
     this.logoTag,
     this.titleTag,
     this.showDebugButtons = false,
+    this.onFacebookLogin,
+    this.onGoogleLogin,
   }) : super(key: key);
 
   /// Called when the user hit the submit button when in sign up mode
@@ -225,6 +227,9 @@ class FlutterLogin extends StatefulWidget {
 
   /// Called when the user hit the submit button when in login mode
   final AuthCallback onLogin;
+
+  final AuthCallback onFacebookLogin;
+  final AuthCallback onGoogleLogin;
 
   /// Called when the user hit the submit button when in recover password mode
   final RecoverCallback onRecoverPassword;
@@ -550,6 +555,8 @@ class _FlutterLoginState extends State<FlutterLogin>
           create: (context) => Auth(
             onLogin: widget.onLogin,
             onSignup: widget.onSignup,
+            onFacebookLogin: widget.onFacebookLogin,
+            onGoogleLogin: widget.onGoogleLogin,
             onRecoverPassword: widget.onRecoverPassword,
           ),
         ),
