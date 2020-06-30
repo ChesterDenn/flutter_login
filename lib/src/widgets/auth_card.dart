@@ -702,7 +702,7 @@ class _LoginCardState extends State<_LoginCard> with TickerProviderStateMixin {
     return ScaleTransition(
       scale: _buttonScaleAnimation,
       child: AnimatedButton(
-        color: Colors.blue,
+        color: Colors.indigo,
         controller: _submitFacebookController,
         text: "Facebook",
         onPressed: _submitFacebookLogin,
